@@ -1,191 +1,350 @@
-<!--
-    Winhweel.js basic code wheel example by Douglas McKechie @ www.dougtesting.net
-    See website for tutorials and other documentation.
-
-    The MIT License (MIT)
-
-    Copyright (c) 2016 Douglas McKechie
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
--->
 <html>
-    <head>
-        <title>Aqua Champion Wheel</title>
-        <link rel="stylesheet" href="main.css" type="text/css" />
-        <script type="text/javascript" src="Winwheel.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
-    </head>
-    <body>
-        <div align="center">
-            <p>Choose a power setting then press the Spin button. You will be alerted to the prize won when the spinning stops.</p>
-            <br />
-            <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                    <td>
-                        <div class="power_controls">
-                            <br />
-                            <br />
-                            <table class="power" cellpadding="10" cellspacing="0">
-                                <tr>
-                                    <th align="center">Power</th>
-                                </tr>
-                                <tr>
-                                    <td width="78" align="center" id="pw3" onClick="powerSelected(3);">High</td>
-                                </tr>
-                                <tr>
-                                    <td align="center" id="pw2" onClick="powerSelected(2);">Med</td>
-                                </tr>
-                                <tr>
-                                    <td align="center" id="pw1" onClick="powerSelected(1);">Low</td>
-                                </tr>
-                            </table>
-                            <br />
-                            <img id="spin_button" src="spin_off.png" alt="Spin" onClick="startSpin();" />
-                            <br /><br />
-                            &nbsp;&nbsp;<a href="#" onClick="resetWheel(); return false;">Play Again</a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reset)
-                        </div>
-                    </td>
-                    <td width="438" height="582" class="the_wheel" align="center" valign="center">
-                        <canvas id="canvas" width="434" height="434">
-                            <p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
-                        </canvas>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <script>
-            // Create new wheel object specifying the parameters at creation time.
-            let theWheel = new Winwheel({
-                'numSegments'  : 6,     // Specify number of segments.
-                'outerRadius'  : 212,   // Set outer radius so wheel fits inside the background.
-                'textFontSize' : 28,    // Set font size as desired.
-                'segments'     :        // Define segments including colour and text.
-                [
-                   {'fillStyle' : '#eae56f', 'text' : 'CHRIS'},
-                   {'fillStyle' : '#89f26e', 'text' : 'RHODRI'},
-                   {'fillStyle' : '#7de6ef', 'text' : 'SCOTT'},
-                   {'fillStyle' : '#e7706f', 'text' : 'NILESH'},
-                   {'fillStyle' : '#eae56f', 'text' : 'NISHIL'},
-                   {'fillStyle' : '#89f26e', 'text' : 'MACIEJ'},
-                ],
-                'animation' :           // Specify the animation to use.
-                {
-                    'type'     : 'spinToStop',
-                    'duration' : 5,     // Duration in seconds.
-                    'spins'    : 8,     // Number of complete spins.
-                    'callbackFinished' : alertPrize
+<head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <title>Aqua Champion Wheel</title>
+    <link rel="stylesheet" href="main.css" type="text/css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/>
+    <script type="text/javascript" src="Winwheel.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.es5.min.js"></script>
+</head>
+<body>
+<div align="center">
+    <div id="caption">>> <<</div>
+    <br/>
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td>
+                <div class="power_controls">
+                    <br/>
+                    <br/>
+                    <table class="power" cellpadding="10" cellspacing="0">
+                        <tr>
+                            <th align="center">Power</th>
+                        </tr>
+                        <tr>
+                            <td width="78" align="center" id="pw3" onClick="powerSelected(3);">High</td>
+                        </tr>
+                        <tr>
+                            <td align="center" id="pw2" onClick="powerSelected(2);">Med</td>
+                        </tr>
+                        <tr>
+                            <td align="center" id="pw1" onClick="powerSelected(1);">Low</td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <br/>
+                    &nbsp;&nbsp;<a href="#" onClick="refreshPage();">Refresh</a><br/>
+                </div>
+            </td>
+            <td width="438" height="582" class="the_wheel" align="center" valign="center">
+                <canvas id="canvas" width="434" height="434"
+                        data-responsiveMinWidth="180" data-responsiveScaleHeight="true" data-responsiveMargin="50"
+                        onClick="startSpin();">
+                    <p align="center">Sorry, your browser doesn't support canvas. Please try another.</p>
+                </canvas>
+            </td>
+            <td></td>
+            <td>
+                <ul id="dynamic-list"></ul>
+                <input type="text" id="candidate"/>
+                <button onclick="addSegment(candidate.value, 'grey')">Add</button>
+            </td>
+
+        </tr>
+    </table>
+</div>
+                <p>Log</p>
+                <div id="log" style="{display: block}">
+                </div>
+<script>
+
+    let segments = // Define segments including colour and text.
+        [
+            {'fillStyle': '#B8B22D', 'text': 'CHRIS'},
+            {'fillStyle': '#3F9B27', 'text': 'RHODRI'},
+            {'fillStyle': '#3BB6C0', 'text': 'SCOTT'},
+            {'fillStyle': '#6F99E7', 'text': 'NILESH'},
+            {'fillStyle': '#9E6FEA', 'text': 'NISHIL'},
+            {'fillStyle': '#C35B63', 'text': 'MACIEJ'},
+        ];
+
+    // Vars used by the code in this page to do power controls.
+    let wheelPower = 0;
+    let wheelSpinning = false;
+    let wheelFlashing = false;
+
+    let el = document.getElementById("dynamic-list");
+    Sortable.create(el, {
+        'onMove': function (evt, originalEvent) {
+            return !wheelFlashing && !wheelSpinning;
+        },
+        'onEnd': function (evt) {
+            console.log(evt.oldIndex);
+            console.log(evt.newIndex);
+            console.log(evt.item);
+        }
+    });
+
+    // Create new wheel object specifying the parameters at creation time.
+    let theWheel = new Winwheel({
+        'numSegments': segments.length,     // Specify number of segments.
+        'outerRadius': 212,   // Set outer radius so wheel fits inside the background.
+        'textFontSize': 28,    // Set font size as desired.
+        'responsive': true,
+        'segments': segments,
+        'pins': {
+            'outerRadius': 6,
+            'responsive': true
+        },
+        'animation':           // Specify the animation to use.
+            {
+                'type': 'spinToStop',
+                'duration': 5,     // Duration in seconds.
+                'spins': 8,     // Number of complete spins.
+                'callbackFinished': alertPrize
+            }
+    });
+
+
+    function addToList(value, color) {
+        let ul = document.getElementById("dynamic-list");
+        let li = document.createElement("li");
+        li.setAttribute('id', value);
+        li.style.setProperty('color', color);
+
+        div = document.createElement("div");
+        div.className = "color-picker";
+
+        div_cont = document.createElement("div")
+        div_cont.className = "item-container";
+
+        div_cont.appendChild(document.createTextNode(value))
+        div_cont.appendChild(div)
+
+        let pickr = Pickr.create({
+            el: div,
+            theme: 'nano', // or 'monolith', or 'nano'
+            default: color,
+
+            components: {
+
+                // Main components
+                preview: true,
+                hue: true,
+
+                // Input / output Options
+                interaction: {
+                    input: true,
+                    save: true,
+                }
+            }
+        });
+
+        pickr.on('save', (new_color, instance) => {
+            el = document.getElementById(value);
+            newColorHex = new_color.toHEXA()
+            el.style.setProperty('color', newColorHex);
+
+            theWheel.segments.forEach(s => {
+                if (s != null) {
+                    if (s.text === value) {
+                        s.fillStyle = newColorHex;
+                        resetWheel();
+                    }
                 }
             });
 
-            // Vars used by the code in this page to do power controls.
-            let wheelPower    = 0;
-            let wheelSpinning = false;
+        });
+        let button = document.createElement("input");
+        button.type = "button";
+        button.value = "Remove";
+        button.onclick = function () {
+            removeFromList(value);
+            resetWheel();
+        };
 
-            // -------------------------------------------------------
-            // Function to handle the onClick on the power buttons.
-            // -------------------------------------------------------
-            function powerSelected(powerLevel)
-            {
-                // Ensure that power can't be changed while wheel is spinning.
-                if (wheelSpinning == false) {
-                    // Reset all to grey incase this is not the first time the user has selected the power.
-                    document.getElementById('pw1').className = "";
-                    document.getElementById('pw2').className = "";
-                    document.getElementById('pw3').className = "";
+        div_cont.appendChild(button);
+        li.appendChild(div_cont);
+        ul.appendChild(li);
+    }
 
-                    // Now light up all cells below-and-including the one selected by changing the class.
-                    if (powerLevel >= 1) {
-                        document.getElementById('pw1').className = "pw1";
-                    }
+    // Simple example, see optional options for more configuration.
 
-                    if (powerLevel >= 2) {
-                        document.getElementById('pw2').className = "pw2";
-                    }
+    function addSegment(value, color) {
+        addToList(value, color);
+        theWheel.addSegment({'fillStyle': color, 'text': value});
+        resetWheel();
+    }
 
-                    if (powerLevel >= 3) {
-                        document.getElementById('pw3').className = "pw3";
-                    }
-
-                    // Set wheelPower var used when spin button is clicked.
-                    wheelPower = powerLevel;
-
-                    // Light up the spin button by changing it's source image and adding a clickable class to it.
-                    document.getElementById('spin_button').src = "spin_on.png";
-                    document.getElementById('spin_button').className = "clickable";
+    function removeFromWheelByName(name) {
+        let found = false;
+        let i = 0;
+        theWheel.segments.forEach(s => {
+            if (s != null) {
+                if (s.text === name) {
+                    found = true;
+                    i = theWheel.segments.indexOf(s);
+                    console.log("found " + i + " with " + name);
                 }
             }
+        });
+        if (found) {
+            theWheel.deleteSegment(i);
+            resetWheel();
+        }
+    }
 
-            // -------------------------------------------------------
-            // Click handler for spin button.
-            // -------------------------------------------------------
-            function startSpin()
-            {
-                // Ensure that spinning can't be clicked again while already running.
-                if (wheelSpinning == false) {
-                    // Based on the power level selected adjust the number of spins for the wheel, the more times is has
-                    // to rotate with the duration of the animation the quicker the wheel spins.
-                    if (wheelPower == 1) {
-                        theWheel.animation.spins = 3;
-                    } else if (wheelPower == 2) {
-                        theWheel.animation.spins = 8;
-                    } else if (wheelPower == 3) {
-                        theWheel.animation.spins = 15;
-                    }
+    function removeFromList(value) {
+        if (wheelSpinning || wheelFlashing) {
+            return;
+        }
+        let ul = document.getElementById("dynamic-list");
+        if (value) {
+            let item = document.getElementById(value);
+            if (item) {
+                ul.removeChild(item);
+                removeFromWheelByName(value);
+            } else {
+                console.error("Can't find item ", value);
+            }
+        } else {
+            console.error("Empty candidate");
+        }
+    }
 
-                    // Disable the spin button so can't click again while wheel is spinning.
-                    document.getElementById('spin_button').src       = "spin_off.png";
-                    document.getElementById('spin_button').className = "";
+    segments.forEach(s => addToList(s['text'], s['fillStyle']));
+    // Simple example, see optional options for more configuration.
 
-                    // Begin the spin animation by calling startAnimation on the wheel object.
-                    theWheel.startAnimation();
+    // -------------------------------------------------------
+    // Function to handle the onClick on the power buttons.
+    // -------------------------------------------------------
+    function powerSelected(powerLevel) {
+        // Ensure that power can't be changed while wheel is spinning.
+        if (wheelSpinning === false) {
+            // Reset all to grey incase this is not the first time the user has selected the power.
+            document.getElementById('pw1').className = "";
+            document.getElementById('pw2').className = "";
+            document.getElementById('pw3').className = "";
 
-                    // Set to true so that power can't be changed and spin button re-enabled during
-                    // the current animation. The user will have to reset before spinning again.
-                    wheelSpinning = true;
-                }
+            // Now light up all cells below-and-including the one selected by changing the class.
+            if (powerLevel >= 1) {
+                document.getElementById('pw1').className = "pw1";
             }
 
-            // -------------------------------------------------------
-            // Function for reset button.
-            // -------------------------------------------------------
-            function resetWheel()
-            {
-                theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
-                theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
-                theWheel.draw();                // Call draw to render changes to the wheel.
-
-                document.getElementById('pw1').className = "";  // Remove all colours from the power level indicators.
-                document.getElementById('pw2').className = "";
-                document.getElementById('pw3').className = "";
-
-                wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+            if (powerLevel >= 2) {
+                document.getElementById('pw2').className = "pw2";
             }
 
-            // -------------------------------------------------------
-            // Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters
-            // note the indicated segment is passed in as a parmeter as 99% of the time you will want to know this to inform the user of their prize.
-            // -------------------------------------------------------
-            function alertPrize(indicatedSegment)
-            {
-                // Do basic alert of the segment text. You would probably want to do something more interesting with this information.
-                alert("You have won " + indicatedSegment.text);
+            if (powerLevel >= 3) {
+                document.getElementById('pw3').className = "pw3";
             }
-        </script>
-    </body>
+
+            // Set wheelPower var used when spin button is clicked.
+            wheelPower = powerLevel;
+        }
+    }
+
+    function refreshPage() {
+        window.location.reload();
+    }
+
+    // -------------------------------------------------------
+    // Click handler for spin button.
+    // -------------------------------------------------------
+    function startSpin() {
+        // Ensure that spinning can't be clicked again while already running.
+        if (wheelSpinning === false && wheelFlashing === false) {
+
+            if (theWheel.numSegments === 1) {
+                alert("Have a nice day");
+                refreshPage();
+            }
+
+            // Based on the power level selected adjust the number of spins for the wheel, the more times is has
+            // to rotate with the duration of the animation the quicker the wheel spins.
+            if (wheelPower === 1) {
+                theWheel.animation.spins = 3;
+            } else if (wheelPower === 2) {
+                theWheel.animation.spins = 8;
+            } else if (wheelPower === 3) {
+                theWheel.animation.spins = 15;
+            }
+
+            theWheel.stopAnimation(false);
+            theWheel.rotationAngle = theWheel.rotationAngle % 360;
+
+            // Begin the spin animation by calling startAnimation on the wheel object.
+            theWheel.startAnimation();
+
+            // Set to true so that power can't be changed and spin button re-enabled during
+            // the current animation. The user will have to reset before spinning again.
+            wheelSpinning = true;
+        }
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // -------------------------------------------------------
+    // Function for reset button.
+    // -------------------------------------------------------
+    function resetWheel() {
+        theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
+        //theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
+        theWheel.draw();                // Call draw to render changes to the wheel.
+
+        document.getElementById('pw1').className = "";  // Remove all colours from the power level indicators.
+        document.getElementById('pw2').className = "";
+        document.getElementById('pw3').className = "";
+
+        wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+    }
+
+    async function flash(indicatedSegment, numOfTimes) {
+        wheelFlashing = true;
+
+        let el = document.getElementById(indicatedSegment.text);
+        let originalColor = el.style.color;
+
+
+        for (let i = 0; i < numOfTimes; i++) {
+            let originalFillStyle = indicatedSegment.fillStyle;
+            indicatedSegment.fillStyle = 'yellow';
+            el.style.setProperty('color', 'yellow');
+            resetWheel();
+            await sleep(300);
+
+            indicatedSegment.fillStyle = originalFillStyle;
+            el.style.setProperty('color', originalColor);
+            resetWheel();
+            await sleep(300);
+        }
+        wheelFlashing = false;
+    }
+
+    async function alertPrize(indicatedSegment) {
+        document.getElementById("caption").textContent = " >> " + indicatedSegment.text + " << ";
+        let log = document.getElementById("log");
+        let d = new Date()
+        log.appendChild(document.createTextNode("[" + d.toGMTString() + "]    " + indicatedSegment.text + " won"))
+        log.appendChild(document.createElement("br"));
+
+
+        await flash(indicatedSegment, 5);
+
+        removeFromList(indicatedSegment.text);
+
+        let segmentIndex = theWheel.segments.indexOf(indicatedSegment);
+
+        theWheel.rotationAngle = (360 / theWheel.numSegments) * segmentIndex;
+
+        resetWheel();
+    }
+</script>
+</body>
 </html>

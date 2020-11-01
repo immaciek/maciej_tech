@@ -65,12 +65,12 @@
 
     let segments = // Define segments including colour and text.
         [
-            {'fillStyle': '#B8B22D', 'text': 'ANTHONY'},
-            {'fillStyle': '#3F9B27', 'text': 'JOHN'},
-            {'fillStyle': '#3BB6C0', 'text': 'ZOE'},
-            // {'fillStyle': '#6F99E7', 'text': 'NILESH'},
-            // {'fillStyle': '#9E6FEA', 'text': 'NISHIL'},
-            // {'fillStyle': '#C35B63', 'text': 'MACIEJ'},
+            {'fillStyle': '#B8B22D', 'text': 'CHRIS'},
+            {'fillStyle': '#3F9B27', 'text': 'SCOTT'},
+            {'fillStyle': '#3BB6C0', 'text': 'RHODRI'},
+            {'fillStyle': '#6F99E7', 'text': 'NILESH'},
+            {'fillStyle': '#9E6FEA', 'text': 'NISHIL'},
+            {'fillStyle': '#C35B63', 'text': 'MACIEJ'},
         ]
 
     // Vars used by the code in this page to do power controls.
@@ -188,6 +188,7 @@
                 if (s != null) {
                     if (s.text === value) {
                         s.fillStyle = newColorHex
+                        document.getElementById(value).firstChild.style.color = newColorHex
                         resetWheel()
                     }
                 }

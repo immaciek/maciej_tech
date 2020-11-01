@@ -68,9 +68,18 @@ td.pw3
     background-color: #ef6f6f;
 }
 
+
+ul {
+    list-style-type: none;
+}
+
+li {
+    margin-top: 1em;
+}
+
 div.participant-menu
 {
-    margin-top: 1em;
+    display: inline;
 }
 
 div.participant-name > input {

@@ -65,12 +65,12 @@
 
     let segments = // Define segments including colour and text.
         [
-            {'fillStyle': '#B8B22D', 'text': 'CHRIS'},
-            {'fillStyle': '#3F9B27', 'text': 'RHODRI'},
-            {'fillStyle': '#3BB6C0', 'text': 'SCOTT'},
-            {'fillStyle': '#6F99E7', 'text': 'NILESH'},
-            {'fillStyle': '#9E6FEA', 'text': 'NISHIL'},
-            {'fillStyle': '#C35B63', 'text': 'MACIEJ'},
+            {'fillStyle': '#B8B22D', 'text': 'ANTHONY'},
+            {'fillStyle': '#3F9B27', 'text': 'JOHN'},
+            {'fillStyle': '#3BB6C0', 'text': 'ZOE'},
+            // {'fillStyle': '#6F99E7', 'text': 'NILESH'},
+            // {'fillStyle': '#9E6FEA', 'text': 'NISHIL'},
+            // {'fillStyle': '#C35B63', 'text': 'MACIEJ'},
         ]
 
     // Vars used by the code in this page to do power controls.
@@ -141,11 +141,15 @@
         }
 
         textNode.onblur = function() {
+            console.log("TEXT " + selectedNodeFromList.text)
+            el = document.getElementById(selectedNodeFromList.text)
             if (this.value !== "") {
                 selectedNodeFromList.text = this.value
+                el.id = selectedNodeFromList.text
             } else {
                 selectedNodeFromList.text = "N/A"
                 this.value = "N/A"
+                el.id = "N/A"
             }
             resetWheel()
         }
@@ -302,7 +306,7 @@
     // -------------------------------------------------------
     function startSpin() {
         // Ensure that spinning can't be clicked again while already running.
-        if (wheelSpinning === false && wheelFlashing === false) {
+        if (!wheelSpinning && !wheelFlashing) {
 
             if (theWheel.numSegments === 1) {
                 alert("Have a nice day")
@@ -352,13 +356,12 @@
 
     async function flash(indicatedSegment, numOfTimes) {
         wheelFlashing = true
-
+        console.log(indicatedSegment.text)
         let el = document.getElementById(indicatedSegment.text)
         let originalColor = el.style.backgroundColor
-
+        let originalFillStyle = indicatedSegment.fillStyle
 
         for (let i = 0; i < numOfTimes; i++) {
-            let originalFillStyle = indicatedSegment.fillStyle
             indicatedSegment.fillStyle = 'yellow'
             el.style.setProperty('background-color', 'yellow')
             resetWheel()
@@ -381,7 +384,7 @@
         log.appendChild(document.createElement("br"))
 
         await flash(indicatedSegment, 5)
-
+        console.log(indicatedSegment.text)
         removeFromListAndWheel(indicatedSegment.text)
     }
 </script>

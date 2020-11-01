@@ -81,9 +81,11 @@
     let el = document.getElementById("dynamic-list")
     Sortable.create(el, {
         'onMove': function (evt, originalEvent) {
+            console.log(evt)
             return !wheelFlashing && !wheelSpinning
         },
         'onEnd': function (evt) {
+            console.log(evt.item.text)
             console.log(evt.oldIndex)
             console.log(evt.newIndex)
             console.log(evt.item)
@@ -197,9 +199,11 @@
         button.type = "button"
         button.value = "Remove"
         button.onclick = function () {
-            result = removeFromListAndWheel(value)
+            result = removeFromListAndWheel(this.parentElement.firstChild.firstChild.value)
             if (result) {
                 resetWheel()
+            } else {
+                console.error("Failed to remove ", result)
             }
         }
 

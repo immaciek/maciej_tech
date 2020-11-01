@@ -5,6 +5,7 @@
     <title>Aqua Champion Wheel</title>
     <link rel="stylesheet" href="main.css" type="text/css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <script type="text/javascript" src="Winwheel.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -70,24 +71,24 @@
             {'fillStyle': '#6F99E7', 'text': 'NILESH'},
             {'fillStyle': '#9E6FEA', 'text': 'NISHIL'},
             {'fillStyle': '#C35B63', 'text': 'MACIEJ'},
-        ];
+        ]
 
     // Vars used by the code in this page to do power controls.
-    let wheelPower = 0;
-    let wheelSpinning = false;
-    let wheelFlashing = false;
+    let wheelPower = 0
+    let wheelSpinning = false
+    let wheelFlashing = false
 
-    let el = document.getElementById("dynamic-list");
+    let el = document.getElementById("dynamic-list")
     Sortable.create(el, {
         'onMove': function (evt, originalEvent) {
-            return !wheelFlashing && !wheelSpinning;
+            return !wheelFlashing && !wheelSpinning
         },
         'onEnd': function (evt) {
-            console.log(evt.oldIndex);
-            console.log(evt.newIndex);
-            console.log(evt.item);
+            console.log(evt.oldIndex)
+            console.log(evt.newIndex)
+            console.log(evt.item)
         }
-    });
+    })
 
     // Create new wheel object specifying the parameters at creation time.
     let theWheel = new Winwheel({
@@ -107,38 +108,49 @@
                 'spins': 8,     // Number of complete spins.
                 'callbackFinished': alertPrize
             }
-    });
+    })
 
 
     function addToList(value, color) {
-        let ul = document.getElementById("dynamic-list");
-        let li = document.createElement("li");
-        li.setAttribute('id', value);
-        li.style.setProperty('color', color);
+        let ul = document.getElementById("dynamic-list")
+        let li = document.createElement("li")
+        li.setAttribute('id', value)
+
 
         let div_cont = document.createElement("div")
-        div_cont.className = "participant-menu";
+        div_cont.className = "participant-menu"
 
-        let colorPicker = document.createElement("div");
-        colorPicker.className = "color-picker";
+        let colorPicker = document.createElement("div")
+        colorPicker.className = "color-picker"
 
-        let nameNode = document.createElement("div");
+        let nameNode = document.createElement("div")
         nameNode.className = "participant-name"
 
-        let textNode = document.createElement("input");
-        textNode.type = "text";
-        textNode.value = value;
+        let textNode = document.createElement("input")
+        textNode.type = "text"
+        textNode.value = value
+        textNode.style.setProperty('color', color)
 
         textNode.onclick = function () {
-            selectedNodeFromList = getSlice(this.value)
+            if (wheelFlashing || wheelSpinning) {
+                this.setAttribute("readonly", true)
+            } else {
+                this.removeAttribute("readonly")
+                selectedNodeFromList = getSlice(this.value)
+            }
         }
 
         textNode.onblur = function() {
-            selectedNodeFromList.text = this.value
-            resetWheel();
+            if (this.value !== "") {
+                selectedNodeFromList.text = this.value
+            } else {
+                selectedNodeFromList.text = "N/A"
+                this.value = "N/A"
+            }
+            resetWheel()
         }
 
-        nameNode.appendChild(textNode);
+        nameNode.appendChild(textNode)
 
         div_cont.appendChild(nameNode)
         div_cont.appendChild(colorPicker)
@@ -159,91 +171,95 @@
                     save: true,
                 }
             }
-        });
+        })
 
         pickr.on('save', (new_color, instance) => {
-            el = document.getElementById(value);
+            el = document.getElementById(value)
             newColorHex = new_color.toHEXA()
-            el.style.setProperty('color', newColorHex);
+            el.style.setProperty('color', newColorHex)
 
             theWheel.segments.forEach(s => {
                 if (s != null) {
                     if (s.text === value) {
-                        s.fillStyle = newColorHex;
-                        resetWheel();
+                        s.fillStyle = newColorHex
+                        resetWheel()
                     }
                 }
-            });
+            })
 
-        });
+        })
 
-        let button = document.createElement("input");
-        button.type = "button";
-        button.value = "Remove";
+        let button = document.createElement("input")
+        button.type = "button"
+        button.value = "Remove"
         button.onclick = function () {
-            result = removeFromListAndWheel(value);
+            result = removeFromListAndWheel(value)
             if (result) {
-                resetWheel();
+                resetWheel()
             }
-        };
+        }
 
-        div_cont.appendChild(button);
-        li.appendChild(div_cont);
-        ul.appendChild(li);
+        div_cont.appendChild(button)
+        li.appendChild(div_cont)
+        ul.appendChild(li)
     }
 
     // Simple example, see optional options for more configuration.
 
     function addSegment(value, color) {
-        addToList(value, color);
-        theWheel.addSegment({'fillStyle': color, 'text': value});
-        resetWheel();
+        if (getSlice(value) == null) {
+            addToList(value, color)
+            theWheel.addSegment({'fillStyle': color, 'text': value})
+            resetWheel()
+        } else {
+            alert("Names have to be unique: " + value)
+        }
     }
 
     function getSlice(value) {
         return theWheel.segments.find(function (el) {
-                return el != null && el.text === value;
+                return el != null && el.text === value
             }
         )
     }
 
     function getSliceIndex(value) {
-        return theWheel.segments.indexOf(getSlice(value));
+        return theWheel.segments.indexOf(getSlice(value))
     }
 
     function removeFromWheelByName(name) {
         if (!wheelSpinning && !wheelFlashing) {
-            let sliceIndex = getSliceIndex(name);
+            let sliceIndex = getSliceIndex(name)
             if (!isNaN(sliceIndex)) {
-                theWheel.deleteSegment(sliceIndex);
+                theWheel.deleteSegment(sliceIndex)
             }
         }
     }
 
     function removeFromListAndWheel(value) {
         if (wheelSpinning || wheelFlashing || theWheel.segments.filter(s => !!s).length === 1) {
-            return false;
+            return false
         }
 
-        let ul = document.getElementById("dynamic-list");
+        let ul = document.getElementById("dynamic-list")
         if (value) {
-            let item = document.getElementById(value);
+            let item = document.getElementById(value)
             if (item) {
-                ul.removeChild(item);
-                removeFromWheelByName(value);
-                theWheel.rotationAngle = 0;
-                resetWheel();
-                return true;
+                ul.removeChild(item)
+                removeFromWheelByName(value)
+                theWheel.rotationAngle = 0
+                resetWheel()
+                return true
             } else {
-                console.error("Can't find item ", value);
+                console.error("Can't find item ", value)
             }
         } else {
-            console.error("Empty candidate");
+            console.error("Empty candidate")
         }
-        return false;
+        return false
     }
 
-    segments.forEach(s => addToList(s['text'], s['fillStyle']));
+    segments.forEach(s => addToList(s['text'], s['fillStyle']))
     // Simple example, see optional options for more configuration.
 
     // -------------------------------------------------------
@@ -253,32 +269,32 @@
         // Ensure that power can't be changed while wheel is spinning.
         if (wheelSpinning === false) {
             // Reset all to grey incase this is not the first time the user has selected the power.
-            document.getElementById('pw1').className = "";
-            document.getElementById('pw2').className = "";
-            document.getElementById('pw3').className = "";
+            document.getElementById('pw1').className = ""
+            document.getElementById('pw2').className = ""
+            document.getElementById('pw3').className = ""
 
             // Now light up all cells below-and-including the one selected by changing the class.
             if (powerLevel >= 1) {
-                document.getElementById('pw1').className = "pw1";
+                document.getElementById('pw1').className = "pw1"
             }
 
             if (powerLevel >= 2) {
-                document.getElementById('pw2').className = "pw2";
+                document.getElementById('pw2').className = "pw2"
             }
 
             if (powerLevel >= 3) {
-                document.getElementById('pw3').className = "pw3";
+                document.getElementById('pw3').className = "pw3"
             }
 
             // Set wheelPower var used when spin button is clicked.
-            wheelPower = powerLevel;
+            wheelPower = powerLevel
         }
     }
 
-    powerSelected(1);
+    powerSelected(1)
 
     function refreshPage() {
-        window.location.reload();
+        window.location.reload()
     }
 
     // -------------------------------------------------------
@@ -289,84 +305,84 @@
         if (wheelSpinning === false && wheelFlashing === false) {
 
             if (theWheel.numSegments === 1) {
-                alert("Have a nice day");
-                refreshPage();
+                alert("Have a nice day")
+                refreshPage()
             }
 
             // Based on the power level selected adjust the number of spins for the wheel, the more times is has
             // to rotate with the duration of the animation the quicker the wheel spins.
             if (wheelPower === 1) {
-                theWheel.animation.spins = 3;
+                theWheel.animation.spins = 3
             } else if (wheelPower === 2) {
-                theWheel.animation.spins = 8;
+                theWheel.animation.spins = 8
             } else if (wheelPower === 3) {
-                theWheel.animation.spins = 15;
+                theWheel.animation.spins = 15
             }
 
-            theWheel.stopAnimation(false);
-            theWheel.rotationAngle = theWheel.rotationAngle % 360;
+            theWheel.stopAnimation(false)
+            theWheel.rotationAngle = theWheel.rotationAngle % 360
 
             // Begin the spin animation by calling startAnimation on the wheel object.
-            theWheel.startAnimation();
+            theWheel.startAnimation()
 
             // Set to true so that power can't be changed and spin button re-enabled during
             // the current animation. The user will have to reset before spinning again.
-            wheelSpinning = true;
+            wheelSpinning = true
         }
     }
 
     function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise(resolve => setTimeout(resolve, ms))
     }
 
     // -------------------------------------------------------
     // Function for reset button.
     // -------------------------------------------------------
     function resetWheel() {
-        theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
-        theWheel.draw();                // Call draw to render changes to the wheel.
+        theWheel.stopAnimation(false)  // Stop the animation, false as param so does not call callback function.
+        theWheel.draw()                // Call draw to render changes to the wheel.
 
-        document.getElementById('pw1').className = "";  // Remove all colours from the power level indicators.
-        document.getElementById('pw2').className = "";
-        document.getElementById('pw3').className = "";
+        document.getElementById('pw1').className = ""  // Remove all colours from the power level indicators.
+        document.getElementById('pw2').className = ""
+        document.getElementById('pw3').className = ""
 
-        wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
-        powerSelected(wheelPower);
+        wheelSpinning = false          // Reset to false to power buttons and spin can be clicked again.
+        powerSelected(wheelPower)
     }
 
     async function flash(indicatedSegment, numOfTimes) {
-        wheelFlashing = true;
+        wheelFlashing = true
 
-        let el = document.getElementById(indicatedSegment.text);
-        let originalColor = el.style.backgroundColor;
+        let el = document.getElementById(indicatedSegment.text)
+        let originalColor = el.style.backgroundColor
 
 
         for (let i = 0; i < numOfTimes; i++) {
-            let originalFillStyle = indicatedSegment.fillStyle;
-            indicatedSegment.fillStyle = 'yellow';
-            el.style.setProperty('background-color', 'yellow');
-            resetWheel();
-            await sleep(300);
+            let originalFillStyle = indicatedSegment.fillStyle
+            indicatedSegment.fillStyle = 'yellow'
+            el.style.setProperty('background-color', 'yellow')
+            resetWheel()
+            await sleep(300)
 
-            indicatedSegment.fillStyle = originalFillStyle;
-            el.style.setProperty('background-color', originalColor);
-            resetWheel();
-            await sleep(300);
+            indicatedSegment.fillStyle = originalFillStyle
+            el.style.setProperty('background-color', originalColor)
+            resetWheel()
+            await sleep(300)
         }
-        wheelFlashing = false;
+        wheelFlashing = false
     }
 
     async function alertPrize(indicatedSegment) {
-        document.getElementById("caption").textContent = " >> " + indicatedSegment.text + " << ";
+        document.getElementById("caption").textContent = " >> " + indicatedSegment.text + " << "
 
-        let log = document.getElementById("log");
+        let log = document.getElementById("log")
         let d = new Date()
         log.appendChild(document.createTextNode("[" + d.toGMTString() + "]    " + indicatedSegment.text + " won"))
-        log.appendChild(document.createElement("br"));
+        log.appendChild(document.createElement("br"))
 
-        await flash(indicatedSegment, 5);
+        await flash(indicatedSegment, 5)
 
-        removeFromListAndWheel(indicatedSegment.text);
+        removeFromListAndWheel(indicatedSegment.text)
     }
 </script>
 </body>

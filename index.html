@@ -57,9 +57,9 @@
         </tr>
     </table>
 </div>
-                <p>Log</p>
-                <div id="log" style="{display: block}">
-                </div>
+<p>Log</p>
+<div id="log">
+</div>
 <script>
 
     let segments = // Define segments including colour and text.
@@ -116,22 +116,39 @@
         li.setAttribute('id', value);
         li.style.setProperty('color', color);
 
-        div = document.createElement("div");
-        div.className = "color-picker";
+        let div_cont = document.createElement("div")
+        div_cont.className = "participant-menu";
 
-        div_cont = document.createElement("div")
-        div_cont.className = "item-container";
+        let colorPicker = document.createElement("div");
+        colorPicker.className = "color-picker";
 
-        div_cont.appendChild(document.createTextNode(value))
-        div_cont.appendChild(div)
+        let nameNode = document.createElement("div");
+        nameNode.className = "participant-name"
+
+        let textNode = document.createElement("input");
+        textNode.type = "text";
+        textNode.value = value;
+
+        textNode.onclick = function () {
+            selectedNodeFromList = getSlice(this.value)
+        }
+
+        textNode.onblur = function() {
+            selectedNodeFromList.text = this.value
+            resetWheel();
+        }
+
+        nameNode.appendChild(textNode);
+
+        div_cont.appendChild(nameNode)
+        div_cont.appendChild(colorPicker)
 
         let pickr = Pickr.create({
-            el: div,
-            theme: 'nano', // or 'monolith', or 'nano'
+            el: colorPicker,
+            theme: 'nano',
             default: color,
 
             components: {
-
                 // Main components
                 preview: true,
                 hue: true,
@@ -159,12 +176,15 @@
             });
 
         });
+
         let button = document.createElement("input");
         button.type = "button";
         button.value = "Remove";
         button.onclick = function () {
-            removeFromList(value);
-            resetWheel();
+            result = removeFromListAndWheel(value);
+            if (result) {
+                resetWheel();
+            }
         };
 
         div_cont.appendChild(button);
@@ -180,40 +200,47 @@
         resetWheel();
     }
 
-    function removeFromWheelByName(name) {
-        let found = false;
-        let i = 0;
-        theWheel.segments.forEach(s => {
-            if (s != null) {
-                if (s.text === name) {
-                    found = true;
-                    i = theWheel.segments.indexOf(s);
-                    console.log("found " + i + " with " + name);
-                }
+    function getSlice(value) {
+        return theWheel.segments.find(function (el) {
+                return el != null && el.text === value;
             }
-        });
-        if (found) {
-            theWheel.deleteSegment(i);
-            resetWheel();
+        )
+    }
+
+    function getSliceIndex(value) {
+        return theWheel.segments.indexOf(getSlice(value));
+    }
+
+    function removeFromWheelByName(name) {
+        if (!wheelSpinning && !wheelFlashing) {
+            let sliceIndex = getSliceIndex(name);
+            if (!isNaN(sliceIndex)) {
+                theWheel.deleteSegment(sliceIndex);
+            }
         }
     }
 
-    function removeFromList(value) {
-        if (wheelSpinning || wheelFlashing) {
-            return;
+    function removeFromListAndWheel(value) {
+        if (wheelSpinning || wheelFlashing || theWheel.segments.filter(s => !!s).length === 1) {
+            return false;
         }
+
         let ul = document.getElementById("dynamic-list");
         if (value) {
             let item = document.getElementById(value);
             if (item) {
                 ul.removeChild(item);
                 removeFromWheelByName(value);
+                theWheel.rotationAngle = 0;
+                resetWheel();
+                return true;
             } else {
                 console.error("Can't find item ", value);
             }
         } else {
             console.error("Empty candidate");
         }
+        return false;
     }
 
     segments.forEach(s => addToList(s['text'], s['fillStyle']));
@@ -247,6 +274,8 @@
             wheelPower = powerLevel;
         }
     }
+
+    powerSelected(1);
 
     function refreshPage() {
         window.location.reload();
@@ -295,7 +324,6 @@
     // -------------------------------------------------------
     function resetWheel() {
         theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
-        //theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
         theWheel.draw();                // Call draw to render changes to the wheel.
 
         document.getElementById('pw1').className = "";  // Remove all colours from the power level indicators.
@@ -303,24 +331,25 @@
         document.getElementById('pw3').className = "";
 
         wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+        powerSelected(wheelPower);
     }
 
     async function flash(indicatedSegment, numOfTimes) {
         wheelFlashing = true;
 
         let el = document.getElementById(indicatedSegment.text);
-        let originalColor = el.style.color;
+        let originalColor = el.style.backgroundColor;
 
 
         for (let i = 0; i < numOfTimes; i++) {
             let originalFillStyle = indicatedSegment.fillStyle;
             indicatedSegment.fillStyle = 'yellow';
-            el.style.setProperty('color', 'yellow');
+            el.style.setProperty('background-color', 'yellow');
             resetWheel();
             await sleep(300);
 
             indicatedSegment.fillStyle = originalFillStyle;
-            el.style.setProperty('color', originalColor);
+            el.style.setProperty('background-color', originalColor);
             resetWheel();
             await sleep(300);
         }
@@ -329,21 +358,15 @@
 
     async function alertPrize(indicatedSegment) {
         document.getElementById("caption").textContent = " >> " + indicatedSegment.text + " << ";
+
         let log = document.getElementById("log");
         let d = new Date()
         log.appendChild(document.createTextNode("[" + d.toGMTString() + "]    " + indicatedSegment.text + " won"))
         log.appendChild(document.createElement("br"));
 
-
         await flash(indicatedSegment, 5);
 
-        removeFromList(indicatedSegment.text);
-
-        let segmentIndex = theWheel.segments.indexOf(indicatedSegment);
-
-        theWheel.rotationAngle = (360 / theWheel.numSegments) * segmentIndex;
-
-        resetWheel();
+        removeFromListAndWheel(indicatedSegment.text);
     }
 </script>
 </body>

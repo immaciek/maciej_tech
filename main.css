@@ -68,6 +68,11 @@ td.pw3
     background-color: #ef6f6f;
 }
 
+div.participant-menu
+{
+    margin-top: 1em;
+}
+
 /* Style applied to the spin button once a power has been selected */
 .clickable
 {

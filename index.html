@@ -143,7 +143,6 @@
         }
 
         textNode.onblur = function() {
-            console.log("TEXT " + selectedNodeFromList.text)
             el = document.getElementById(selectedNodeFromList.text)
             if (this.value !== "") {
                 selectedNodeFromList.text = this.value
@@ -180,20 +179,16 @@
         })
 
         pickr.on('save', (new_color, instance) => {
-            el = document.getElementById(value)
             newColorHex = new_color.toHEXA()
-            el.style.setProperty('color', newColorHex)
 
-            theWheel.segments.forEach(s => {
-                if (s != null) {
-                    if (s.text === value) {
-                        s.fillStyle = newColorHex
-                        document.getElementById(value).firstChild.style.color = newColorHex
-                        resetWheel()
-                    }
-                }
-            })
-
+            let slice = getSlice(value)
+            if (slice != null) {
+                slice.fillStyle = newColorHex
+                el = document.getElementById(value)
+                let textInput = el.firstChild.firstChild.firstChild
+                textInput.style.color = newColorHex
+                resetWheel()
+            }
         })
 
         let button = document.createElement("input")
@@ -361,7 +356,6 @@
 
     async function flash(indicatedSegment, numOfTimes) {
         wheelFlashing = true
-        console.log(indicatedSegment.text)
         let el = document.getElementById(indicatedSegment.text)
         let originalColor = el.style.backgroundColor
         let originalFillStyle = indicatedSegment.fillStyle
@@ -389,7 +383,6 @@
         log.appendChild(document.createElement("br"))
 
         await flash(indicatedSegment, 5)
-        console.log(indicatedSegment.text)
         removeFromListAndWheel(indicatedSegment.text)
     }
 </script>
